@@ -35,6 +35,9 @@ function createApp(options) {
 
 function renderFullPage({state, html}) {
 	// build complete html page use html and state
+}
+
+function onRenderSuccess({ html, url, env }) {
 	// add custom cache logic
 }
 
@@ -43,7 +46,8 @@ app.use(ssr.runtimeSSRMiddle({
 	createApp: createApp,
 	initialState: {}, // custom initialState
 	asyncActions: ['topic/fetchTopic', ...], // async actions in dva
-	renderFullPage: renderFullPage
+	renderFullPage: renderFullPage,
+	onRenderSuccess: onRenderSuccess
 }));
 
 ......
@@ -62,7 +66,8 @@ ssr.preSSRService({
 	createApp: createApp,
 	initialState: {}, // custom initialState
 	asyncActions: ['topic/fetchTopic', ...], // async actions in dva
-	renderFullPage: renderFullPage
+	renderFullPage: renderFullPage,
+	onRenderSuccess: onRenderSuccess
 })
 
 ```

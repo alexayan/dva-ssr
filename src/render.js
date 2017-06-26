@@ -5,7 +5,7 @@ import dvaServerSync from './dvaServerSync';
 import block from './block';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-export default async function render({ url, env, routes, renderFullPage, createApp, initialState, asyncActions }) {
+export default async function render({ url, env, routes, renderFullPage, createApp, initialState, asyncActions, onRenderSuccess }) {
   return new Promise((resolve, reject) => {
     try {
       match({
@@ -24,7 +24,10 @@ export default async function render({ url, env, routes, renderFullPage, createA
             }
           });
           const fragment = await renderFragment(createApp, renderProps, state, asyncActions);
-          const html = renderFullPage(fragment);
+          const html = await renderFullPage(fragment);
+          if (onRenderSuccess) {
+            await onRenderSuccess({html, url, env})
+          }
           resolve({ code: 200, url, env, html });
         } else {
           resolve({ code: 404, url, env });

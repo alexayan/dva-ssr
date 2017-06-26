@@ -1,7 +1,7 @@
 import Render from './render';
 import { createRoutes } from 'dva/router';
 
-export default function preSSRService({ routes, renderFullPage, createApp, initialState, asyncActions, interval = 10000 }) {
+export default function preSSRService({ routes, renderFullPage, createApp, initialState, asyncActions, interval = 10000, onRenderSuccess }) {
   const paths = getPathsFromRoutes(routes);
   paths.forEach(path => {
     new RenderService({
@@ -14,6 +14,7 @@ export default function preSSRService({ routes, renderFullPage, createApp, initi
         createApp,
         initialState,
         asyncActions,
+        onRenderSuccess,
         env: {
           platform: 'pc'
         }
@@ -29,6 +30,7 @@ export default function preSSRService({ routes, renderFullPage, createApp, initi
         createApp,
         initialState,
         asyncActions,
+        onRenderSuccess,
         env: {
           platform: 'mobile'
         }
@@ -71,7 +73,7 @@ export class RenderService {
   }
 
   async render() {
-    await Render(this.renderOptions);
+    const res = await Render(this.renderOptions);
     this.timer = setTimeout(this.run.bind(this), this.timeout);
   }
 
