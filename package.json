@@ -1,6 +1,6 @@
 {
   "name": "express-dva-ssr",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "dva server side render middleware for express",
   "main": "lib/index.js",
   "scripts": {

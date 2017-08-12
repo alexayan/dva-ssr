@@ -1,12 +1,12 @@
 import MobileDetect from 'mobile-detect';
 import render from './render';
 
-export default function runtimeSSRMiddle({ routes, renderFullPage, createApp, initialState, asyncActions, onRenderSuccess }) {
+export default function runtimeSSRMiddle({ routes, renderFullPage, createApp, initialState, onRenderSuccess }) {
   return async (req, res, next) => {
     const isMobile = !!new MobileDetect(req.headers['user-agent']).mobile();
     const result = await render({
       url: req.url, env: { platform: (isMobile ? 'mobile' : 'pc') },
-      routes, renderFullPage, createApp, initialState, asyncActions, onRenderSuccess
+      routes, renderFullPage, createApp, initialState, onRenderSuccess
     });
     switch (result.code) {
       case 200:

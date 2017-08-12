@@ -5,7 +5,8 @@ import dvaServerSync from './dvaServerSync';
 import block from './block';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-export default async function render({ url, env, routes, renderFullPage, createApp, initialState, asyncActions, onRenderSuccess }) {
+export default async function render({ url, env, routes, renderFullPage, createApp, initialState, onRenderSuccess }) {
+  initialState = initialState || {};
   return new Promise((resolve, reject) => {
     try {
       match({
@@ -23,10 +24,10 @@ export default async function render({ url, env, routes, renderFullPage, createA
               SSR_ENV: env
             }
           });
-          const fragment = await renderFragment(createApp, renderProps, state, asyncActions);
+          const fragment = await renderFragment(createApp, renderProps, state);
           const html = await renderFullPage(fragment);
           if (onRenderSuccess) {
-            await onRenderSuccess({html, url, env})
+            await onRenderSuccess({ html, url, env, state })
           }
           resolve({ code: 200, url, env, html });
         } else {
@@ -34,31 +35,54 @@ export default async function render({ url, env, routes, renderFullPage, createA
         }
       });
     } catch (err) {
+      console.error({ code: 500, url, env, error: err });
       resolve({ code: 500, url, env, error: err });
     }
   });
 };
 
-async function renderFragment(createApp, renderProps, initialState, asyncActions) {
+async function renderFragment(createApp, renderProps, initialState) {
   const history = createMemoryHistory();
   const id = uid(10);
   const app = createApp({
     history,
     initialState,
   }, id);
-  app.use(dvaServerSync(id, action => {
-    if (asyncActions.indexOf(action.type) > -1) {
-      return true;
-    }
-    return false;
-  }, block));
-  const appDOM = app.start()({ renderProps });
-  let html = renderToStaticMarkup(appDOM);
-  return await new Promise((resolve, reject) => {
-    block.wait(id, () => {
-      const curState = appDOM.props.store.getState();
-      html = renderToStaticMarkup(appDOM);
-      resolve({ html, state: curState });
+  const asyncActions = getAsyncActions(app);
+  if (asyncActions && asyncActions.length > 0) {
+    app.use(dvaServerSync(id, action => {
+      if (asyncActions.indexOf(action.type) > -1) {
+        return true;
+      }
+      return false;
+    }, block));
+    const appDOM = app.start()({ renderProps });
+    let html = renderToStaticMarkup(appDOM);
+    return await new Promise((resolve, reject) => {
+      block.wait(id, () => {
+        const curState = appDOM.props.store.getState();
+        html = renderToStaticMarkup(appDOM);
+        resolve({ html, state: curState });
+      });
     });
-  });
+  } else {
+    const appDOM = app.start()({ renderProps });
+    const html = renderToStaticMarkup(appDOM);
+    const curState = appDOM.props.store.getState();
+    return { html, state: curState };
+  }
+}
+
+function getAsyncActions(app) {
+  try {
+    let actions = [];
+    app._models.forEach((model) => {
+      if (model.effects) {
+        actions = actions.concat(Object.keys(model.effects));
+      }
+    })
+    return actions;
+  } catch (e) {
+    return []
+  }
 }

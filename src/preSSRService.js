@@ -1,7 +1,7 @@
 import Render from './render';
 import { createRoutes } from 'dva/router';
 
-export default function preSSRService({ routes, renderFullPage, createApp, initialState, asyncActions, interval = 10000, onRenderSuccess }) {
+export default function preSSRService({ routes, renderFullPage, createApp, initialState, interval = 10000, onRenderSuccess }) {
   const paths = getPathsFromRoutes(routes);
   paths.forEach(path => {
     new RenderService({
@@ -13,7 +13,6 @@ export default function preSSRService({ routes, renderFullPage, createApp, initi
         renderFullPage,
         createApp,
         initialState,
-        asyncActions,
         onRenderSuccess,
         env: {
           platform: 'pc'
@@ -29,7 +28,6 @@ export default function preSSRService({ routes, renderFullPage, createApp, initi
         renderFullPage,
         createApp,
         initialState,
-        asyncActions,
         onRenderSuccess,
         env: {
           platform: 'mobile'

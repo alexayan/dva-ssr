@@ -7,10 +7,25 @@ dva server side render middleware for express
 ## Install
 
 ``` bash
-$ npm install express-dva-ssr
+$ npm install express-dva-ssr --save
 
 ```
 ## Usage
+
+### options
+
+Option | Type | Require | Description
+:--- | :---: | :---: | :--- 
+routes | ReactElement | yes | react-router routes
+createApp | options:Object => app:DvaApp | yes | function init Dva App and return it
+renderFullPage | {html:String, state:Object} => fullHtml:String | yes | use html fragment and state into a complete html page
+initialState | Object | no | custom initialState for render
+onRenderSuccess | ({ html:String, url:String, env:Object, state:Object}) => void | no | a hook to add custom cache logic
+interval | Number | no | used in preSSRService with default 10000
+
+### env.platform
+
+Used to distinguish whether the mobile or pc
 
 ### render on request
 
@@ -44,8 +59,8 @@ function onRenderSuccess({ html, url, env }) {
 app.use(ssr.runtimeSSRMiddle({
 	routes: routes,
 	createApp: createApp,
-	initialState: {}, // custom initialState
-	asyncActions: ['topic/fetchTopic', ...], // async actions in dva
+	initialState: {},
+	asyncActions: ['topic/fetchTopic', ...], 
 	renderFullPage: renderFullPage,
 	onRenderSuccess: onRenderSuccess
 }));
@@ -61,11 +76,10 @@ app.use(ssr.runtimeSSRMiddle({
 import ssr from 'express-dva-ssr';
 
 ssr.preSSRService({
-	interval: 10000, // render interval
+	interval: 10000,
 	routes: routes,
 	createApp: createApp,
-	initialState: {}, // custom initialState
-	asyncActions: ['topic/fetchTopic', ...], // async actions in dva
+	initialState: {},
 	renderFullPage: renderFullPage,
 	onRenderSuccess: onRenderSuccess
 })
