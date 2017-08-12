@@ -60,7 +60,6 @@ app.use(ssr.runtimeSSRMiddle({
 	routes: routes,
 	createApp: createApp,
 	initialState: {},
-	asyncActions: ['topic/fetchTopic', ...], 
 	renderFullPage: renderFullPage,
 	onRenderSuccess: onRenderSuccess
 }));
