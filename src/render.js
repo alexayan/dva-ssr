@@ -50,7 +50,8 @@ async function renderFragment(createApp, renderProps, initialState) {
     initialState,
   }, id);
   const asyncActions = getAsyncActions(app);
-  if (asyncActions && asyncActions.length > 0) {
+  const sync = renderProps.routes[1].sync;
+  if (!sync && asyncActions && asyncActions.length > 0) {
     app.use(dvaServerSync(id, action => {
       if (asyncActions.indexOf(action.type) > -1) {
         return true;

@@ -27,6 +27,12 @@ interval | Number | no | used in preSSRService with default 10000
 
 Used to distinguish whether the mobile or pc
 
+### route sync property
+
+If you are sure that the rendering of the page does not depend on the asynchronous operation, please provide the `sync` property on `<Route>` definition
+
+`<Route path="/" sync component={Index} />`
+
 ### render on request
 
 ``` node
@@ -36,6 +42,7 @@ import ssr from 'express-dva-ssr';
 
 const routes = (
   <div>
+  	<Route path="/" sync component={Index} />
     <Route path="/topic/:id" component={TopicDetail} />
   </div>
 );
