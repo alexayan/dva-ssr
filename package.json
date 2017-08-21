@@ -1,6 +1,6 @@
 {
   "name": "express-dva-ssr",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "dva server side render middleware for express",
   "main": "lib/index.js",
   "scripts": {
@@ -15,6 +15,10 @@
     "middleware"
   ],
   "author": "alexayan",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexayan/express-dva-ssr.git"
+  },
   "license": "MIT",
   "dependencies": {
     "dva": "^1.2.1",
