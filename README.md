@@ -28,9 +28,11 @@ initialState | Object | no | custom initialState for render
 onRenderSuccess | ({ html:String, url:String, env:Object, state:Object}) => void | no | a hook to add custom cache logic
 interval | Number | no | used in preSSRService with default 10000
 
-### env.platform
+### inject ssr model
 
 Used to distinguish whether the mobile or pc
+
+`ssr: { env: { platform: 'pc' } }`
 
 ### route sync property
 

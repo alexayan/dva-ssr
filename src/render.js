@@ -4,6 +4,7 @@ import uid from 'uid';
 import dvaServerSync from './dvaServerSync';
 import block from './block';
 import { renderToStaticMarkup } from 'react-dom/server';
+import ssrModel from './ssrModel';
 
 export default async function render({ url, env, routes, renderFullPage, createApp, initialState, onRenderSuccess }) {
   initialState = initialState || {};
@@ -20,14 +21,14 @@ export default async function render({ url, env, routes, renderFullPage, createA
         try {
           const pathname = renderProps.location.pathname;
           const state = merge({}, initialState, {
-            app: {
-              SSR_ENV: env
+            ssr: {
+              env,
             }
           });
           const fragment = await renderFragment(createApp, renderProps, state);
           const html = await renderFullPage(fragment);
           if (onRenderSuccess) {
-            await onRenderSuccess({ html, url, env, state })
+            await onRenderSuccess({ html, url, env, state: fragment.state })
           }
           resolve({ code: 200, url, env, html });
         } catch (e) {
@@ -49,6 +50,9 @@ async function renderFragment(createApp, renderProps, initialState) {
     history,
     initialState,
   }, id);
+  if (!existSSRModel(app)) {
+    app.model(ssrModel);
+  }
   const asyncActions = getAsyncActions(app);
   const sync = renderProps.routes[1].sync;
   if (!sync && asyncActions && asyncActions.length > 0) {
@@ -74,6 +78,20 @@ async function renderFragment(createApp, renderProps, initialState) {
     const html = renderToStaticMarkup(appDOM);
     const curState = appDOM.props.store.getState();
     return { html, state: curState };
+  }
+}
+
+function existSSRModel(app) {
+  try {
+    let model = null;
+    app._models.forEach((m) => {
+      if (m.namespace === 'ssr') {
+        model = m;
+      }
+    })
+    return !!model;
+  } catch(e) {
+    return false;
   }
 }
 
