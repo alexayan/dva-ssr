@@ -1,4 +1,13 @@
 {
-    "presets": ["es2017"],
-    "plugins": ["babel-plugin-add-module-exports", "babel-plugin-transform-es2015-modules-commonjs"]   
+  "presets": [
+    "env",
+    "react",
+    "stage-0"
+  ],
+  "plugins": [
+    "transform-class-properties",
+    "transform-decorators",
+    "transform-react-constant-elements",
+    "transform-react-inline-elements"
+  ]
 }

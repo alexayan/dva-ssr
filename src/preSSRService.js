@@ -1,18 +1,18 @@
 import Render from './render';
-import { createRoutes } from 'dva/router';
+import { createMemoryHistory } from 'dva/router';
 
-export default function preSSRService({ routes, renderFullPage, createApp, initialState, interval = 10000, onRenderSuccess }) {
-  const paths = getPathsFromRoutes(routes);
+export default function preSSRService({ renderFullPage, createApp, initialState, interval = 10000, onRenderSuccess }) {
+  const history = createMemoryHistory();
+  const app = createApp({history, initialState});
+  const paths = getPathsFromApp(app);
   paths.forEach(path => {
     new RenderService({
       url: path,
       interval,
       renderOptions: {
         url: path,
-        routes,
         renderFullPage,
-        createApp,
-        initialState,
+        app,
         onRenderSuccess,
         env: {
           platform: 'pc'
@@ -24,10 +24,8 @@ export default function preSSRService({ routes, renderFullPage, createApp, initi
       interval,
       renderOptions: {
         url: path,
-        routes,
         renderFullPage,
-        createApp,
-        initialState,
+        app,
         onRenderSuccess,
         env: {
           platform: 'mobile'
@@ -41,7 +39,7 @@ function isArray(element) {
   return Object.prototype.toString.call(element) === '[object Array]';
 }
 
-function getPathsFromRoutes(routes) {
+function getPathsFromRoutes(app) {
   function searchPaths(routes, paths) {
     if (isArray(routes)) {
       routes.forEach(route => {
@@ -57,7 +55,7 @@ function getPathsFromRoutes(routes) {
       paths.push(routes.path);
     }
   }
-  routes = createRoutes(routes);
+  routes = app._router();
   const paths = [];
   searchPaths(routes, paths);
   return paths;
