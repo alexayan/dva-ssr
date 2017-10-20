@@ -55,6 +55,7 @@ async function renderFragment(createApp, renderProps, initialState) {
   }
   const asyncActions = getAsyncActions(app);
   const sync = renderProps.routes[1].sync;
+  const meta = renderProps.routes[1].meta;
   if (!sync && asyncActions && asyncActions.length > 0) {
     app.use(dvaServerSync(id, action => {
       if (asyncActions.indexOf(action.type) > -1) {
@@ -69,7 +70,7 @@ async function renderFragment(createApp, renderProps, initialState) {
       block.wait(id, () => {
         const curState = appDOM.props.store.getState();
         html = renderToStaticMarkup(appDOM);
-        resolve({ html, state: curState });
+        resolve({ html, state: curState, meta });
       });
     });
   } else {
@@ -77,7 +78,7 @@ async function renderFragment(createApp, renderProps, initialState) {
     history.push(renderProps.location.pathname);
     const html = renderToStaticMarkup(appDOM);
     const curState = appDOM.props.store.getState();
-    return { html, state: curState };
+    return { html, state: curState, meta };
   }
 }
 
