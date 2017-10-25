@@ -82,7 +82,7 @@ async function renderFragment(createApp, routes, url, initialState) {
       block.wait(id, () => {
         const curState = appDOM.props.store.getState();
         html = renderToStaticMarkup(appDOM);
-        resolve({ html, state: curState });
+        resolve({ html, state: curState, context });
       });
     });
     return result;
