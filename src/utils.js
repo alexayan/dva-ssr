@@ -1,4 +1,5 @@
 import { matchPath } from 'react-router';
+import React from 'react';
 
 function isArray(element) {
   return Object.prototype.toString.call(element) === '[object Array]';
@@ -12,7 +13,7 @@ export function searchRoutes(r, callback) {
       });
     }
     if (typeof routes === 'object' && routes.props && routes.props.children) {
-      routes.props.children.forEach((route) => {
+      React.Children.forEach(routes.props.children, (route) => {
         searchPaths(route);
       });
     }

@@ -78,14 +78,14 @@ async function renderFragment(createApp, routes, url, initialState) {
       context,
     });
     let html = renderToStaticMarkup(appDOM);
-    await new Promise((resolve) => {
+    const result = await new Promise((resolve) => {
       block.wait(id, () => {
         const curState = appDOM.props.store.getState();
         html = renderToStaticMarkup(appDOM);
         resolve({ html, state: curState });
       });
     });
-    return;
+    return result;
   }
   const appDOM = app.start()({
     context,
@@ -102,6 +102,9 @@ export default async function render({
     const state = merge({}, initialState || {}, {
       ssr: {
         env,
+      },
+      app: {
+        SSR_ENV: env,
       },
     });
     const fragment = await renderFragment(createApp, routes, url, state);
