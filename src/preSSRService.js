@@ -1,65 +1,11 @@
 import Render from './render';
-import { createRoutes } from 'dva/router';
-
-export default function preSSRService({ routes, renderFullPage, createApp, initialState, interval = 10000, onRenderSuccess }) {
-  const paths = getPathsFromRoutes(routes);
-  paths.forEach(path => {
-    new RenderService({
-      url: path,
-      interval,
-      renderOptions: {
-        url: path,
-        routes,
-        renderFullPage,
-        createApp,
-        initialState,
-        onRenderSuccess,
-        env: {
-          platform: 'pc'
-        }
-      },
-    }).run();
-    new RenderService({
-      url: path,
-      interval,
-      renderOptions: {
-        url: path,
-        routes,
-        renderFullPage,
-        createApp,
-        initialState,
-        onRenderSuccess,
-        env: {
-          platform: 'mobile'
-        }
-      },
-    }).run();
-  });
-}
-
-function isArray(element) {
-  return Object.prototype.toString.call(element) === '[object Array]';
-}
+import { searchRoutes } from './utils';
 
 function getPathsFromRoutes(routes) {
-  function searchPaths(routes, paths) {
-    if (isArray(routes)) {
-      routes.forEach(route => {
-        searchPaths(route, paths);
-      });
-    }
-    if (typeof routes === 'object' && routes.childRoutes) {
-      routes.childRoutes.forEach(route => {
-        searchPaths(route, paths);
-      });
-    }
-    if (typeof routes === 'object' && routes.path) {
-      paths.push(routes.path);
-    }
-  }
-  routes = createRoutes(routes);
   const paths = [];
-  searchPaths(routes, paths);
+  searchRoutes(routes, (route) => {
+    paths.push(route.props.path);
+  });
   return paths;
 }
 
@@ -71,7 +17,7 @@ export class RenderService {
   }
 
   async render() {
-    const res = await Render(this.renderOptions);
+    await Render(this.renderOptions);
     this.timer = setTimeout(this.run.bind(this), this.timeout);
   }
 
@@ -80,6 +26,46 @@ export class RenderService {
   }
 
   stop() {
-    this.timer && clearTimeout(this.timer);
+    if (this.timer) {
+      clearTimeout(this.timer);
+    }
   }
+}
+
+export default function preSSRService({
+  renderFullPage, createApp, initialState, interval = 10000, onRenderSuccess, routes,
+}) {
+  const paths = getPathsFromRoutes(routes);
+  paths.forEach((path) => {
+    new RenderService({
+      url: path,
+      interval,
+      renderOptions: {
+        routes,
+        url: path,
+        renderFullPage,
+        createApp,
+        initialState,
+        onRenderSuccess,
+        env: {
+          platform: 'pc',
+        },
+      },
+    }).run();
+    new RenderService({
+      url: path,
+      interval,
+      renderOptions: {
+        routes,
+        url: path,
+        renderFullPage,
+        createApp,
+        initialState,
+        onRenderSuccess,
+        env: {
+          platform: 'mobile',
+        },
+      },
+    }).run();
+  });
 }

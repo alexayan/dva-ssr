@@ -2,12 +2,17 @@
 
 dva server side render middleware for express
 
+support `dva@2.0.0` `react-router@4.x`
+
 `react` `isomorphism` `dva`
 
 ## Demo
 
 [dva-example-user-dashboard-ssr](https://github.com/alexayan/dva-example-user-dashboard-ssr)
 
+## requirement
+
+`dva@2.0.0` `react-router@4.x`
 
 ## Install
 

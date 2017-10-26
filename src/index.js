@@ -5,5 +5,5 @@ import render from './render';
 export default {
   runtimeSSRMiddle,
   preSSRService,
-  render
+  render,
 };
