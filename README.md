@@ -2,6 +2,8 @@
 
 dva server side render middleware for express
 
+support `dva@2.0.0` `react-router@4.x`
+
 `react` `isomorphism` `dva`
 
 ## Demo
