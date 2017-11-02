@@ -45,7 +45,7 @@ function findSync(branch) {
   return sync;
 }
 
-async function renderFragment(createApp, routes, url, initialState) {
+async function renderFragment(createApp, routes, url, initialState, timeout) {
   const history = createMemoryHistory();
   const context = {};
   const app = createApp({
@@ -78,8 +78,12 @@ async function renderFragment(createApp, routes, url, initialState) {
       context,
     });
     let html = renderToStaticMarkup(appDOM);
-    const result = await new Promise((resolve) => {
+    const result = await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error('render timeout'));
+      }, timeout)
       block.wait(id, () => {
+        clearTimeout(timer);
         const curState = appDOM.props.store.getState();
         html = renderToStaticMarkup(appDOM);
         resolve({ html, state: curState, context });
@@ -96,7 +100,7 @@ async function renderFragment(createApp, routes, url, initialState) {
 }
 
 export default async function render({
-  url, env, routes, renderFullPage, createApp, initialState, onRenderSuccess,
+  url, env, routes, renderFullPage, createApp, initialState, onRenderSuccess, timeout = 6000
 }) {
   try {
     const state = merge({}, initialState || {}, {
@@ -107,7 +111,7 @@ export default async function render({
         SSR_ENV: env,
       },
     });
-    const fragment = await renderFragment(createApp, routes, url, state);
+    const fragment = await renderFragment(createApp, routes, url, state, timeout);
     const context = fragment.context;
     if (!context) {
       return { code: 404, url, env };
