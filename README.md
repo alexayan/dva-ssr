@@ -17,8 +17,10 @@ support `dva@2.0.0` `react-router@4.x`
 ## Install
 
 ``` bash
+# dva@2.x 版本安装
 $ npm install express-dva-ssr --save
-
+# dva@1.x 版本安装
+$ npm install express-dva-ssr@0.2.7 --save
 ```
 ## Usage
 
