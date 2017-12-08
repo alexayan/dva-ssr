@@ -27,6 +27,13 @@ export function searchRoutes(r, callback) {
 
 export function findRouteByUrl(routes, url) {
   const rtn = [];
+  const queryIndex = url.indexOf('?');
+  if (queryIndex > -1) {
+    url = url.slice(0, queryIndex);
+  }
+  if (url.length > 1 && url[url.length - 1] === '/') {
+    url = url.slice(0, -1);
+  }
   searchRoutes(routes, (route) => {
     const match = matchPath(url, route.props);
     if (match) {
