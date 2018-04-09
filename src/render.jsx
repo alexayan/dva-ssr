@@ -47,6 +47,7 @@ function findSync(branch) {
 
 async function renderFragment(createApp, routes, url, initialState, timeout) {
   const history = createMemoryHistory();
+  history.push(url);
   const context = {};
   const app = createApp({
     history,
