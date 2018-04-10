@@ -37,6 +37,12 @@ interval | Number | no | used in preSSRService with default 10000
 timeout | Number | no | render timeout with default 6000
 verbose | Boolean | no | show detail
 
+### render time & async wait time
+
+async wait time: Waiting for the asynchronous method (http request ...) call to complete
+
+render time: async wait time + HTML Fragment generation time
+
 ### inject ssr model
 
 Used to distinguish whether the mobile or pc
