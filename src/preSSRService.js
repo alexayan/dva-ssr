@@ -33,7 +33,7 @@ export class RenderService {
 }
 
 export default function preSSRService({
-  renderFullPage, createApp, initialState, interval = 10000, onRenderSuccess, routes, timeout=6000
+  renderFullPage, createApp, initialState, interval = 10000, onRenderSuccess, routes, timeout=6000, verbose=true
 }) {
   const paths = getPathsFromRoutes(routes);
   paths.forEach((path) => {
@@ -51,6 +51,7 @@ export default function preSSRService({
         env: {
           platform: 'pc',
         },
+        verbose
       },
     }).run();
     new RenderService({
@@ -67,6 +68,7 @@ export default function preSSRService({
         env: {
           platform: 'mobile',
         },
+        verbose
       },
     }).run();
   });

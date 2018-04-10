@@ -45,7 +45,7 @@ function findSync(branch) {
   return sync;
 }
 
-async function renderFragment(createApp, routes, url, initialState, timeout) {
+async function renderFragment(createApp, routes, url, initialState, timeout, verbose) {
   const history = createMemoryHistory();
   history.push(url);
   const context = {};
@@ -78,15 +78,20 @@ async function renderFragment(createApp, routes, url, initialState, timeout) {
     const appDOM = app.start()({
       context,
     });
-    let html = renderToStaticMarkup(appDOM);
+    if (verbose) {
+      console.time(`${url}: async wait time`);
+    }
     const result = await new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         reject(new Error('render timeout'));
       }, timeout)
       block.wait(id, () => {
+        if (verbose) {
+          console.timeEnd(`${url}: async wait time`);
+        }
         clearTimeout(timer);
         const curState = appDOM.props.store.getState();
-        html = renderToStaticMarkup(appDOM);
+        const html = renderToStaticMarkup(appDOM);
         resolve({ html, state: curState, context });
       });
     });
@@ -101,18 +106,22 @@ async function renderFragment(createApp, routes, url, initialState, timeout) {
 }
 
 export default async function render({
-  url, env, routes, renderFullPage, createApp, initialState, onRenderSuccess, timeout = 6000
+  url, env, routes, renderFullPage, createApp, initialState, onRenderSuccess, timeout = 6000, verbose = true
 }) {
   try {
+    if (verbose) {
+      console.log(`[${url}]`)
+      console.time(`${url}: render time`);
+    }
     const state = merge({}, initialState || {}, {
       ssr: {
         env,
-      },
-      app: {
-        SSR_ENV: env,
-      },
+      }
     });
-    const fragment = await renderFragment(createApp, routes, url, state, timeout);
+    const fragment = await renderFragment(createApp, routes, url, state, timeout, verbose);
+    if (verbose) {
+      console.timeEnd(`${url}: render time`);
+    }
     const context = fragment.context;
     if (!context) {
       return { code: 404, url, env };
