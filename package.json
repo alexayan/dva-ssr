@@ -2,7 +2,7 @@
   "name": "express-dva-ssr",
   "description": "dva server side render middleware for express",
   "main": "lib/index.js",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "scripts": {
     "compile": "babel ./src  --out-dir ./lib && babel ./server  --out-dir ./server_dist",
     "prepublish": "npm run compile",
