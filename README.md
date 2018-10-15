@@ -60,7 +60,7 @@ ssr.config({
 ``` javascript
 import ssr from 'express-dva-ssr';
 
-const result:RenderResult = ssr.render({
+ssr.render({
 	url: 'https://www.example.com/users/alexyan', // 需要渲染的路由
 
 	/**
@@ -81,8 +81,8 @@ const result:RenderResult = ssr.render({
 
 	/**
 	 * 初始化 dva app, 注册 model, 返回 dva 实例
-   *
-   * 如果指定 createApp, models 将不生效
+	 *
+	 * 如果指定 createApp, models 将不生效
 	 */
 	createApp: function(opts) {
 		const app = dva(opts);
@@ -96,14 +96,14 @@ const result:RenderResult = ssr.render({
 	 */
 	routes: [<Route path="/" render={() => <div>/</div>} />,
 		<Route path="/user" render={() => <div>/tech</div>} />
-  ],
+  	],
 
-  /**
+  	/**
 	 * 配置 models, 详见 dva model
 	 */
 	models: [
-    Model
-  ],
+		Model
+	],
 
 	/**
 	 * 生成完整网页
@@ -135,7 +135,9 @@ const result:RenderResult = ssr.render({
 	onRenderSuccess: async (html, url, env, state) => {
 
 	}
-});
+}).then((RenderResult) => {
+	console.log(RenderResult);
+})
 
 ```
 
