@@ -2,16 +2,14 @@ import React from 'react';
 import { Route } from 'react-router';
 import ssr from '../lib';
 
-import createApp from './createApp';
+import appModel from './models/app';
 
-const routes = (
-  <div>
-    <Route exact path="/" render={() => <div>/</div>} />
-    <Route exact path="/news" sync render={() => <div>/news</div>} />
-    <Route exact path="/tech" render={() => <div>/tech</div>} />
-    <Route exact path="/browser" render={() => <div>/browser</div>} />
-  </div>
-);
+const routes = [
+    <Route exact key="index" path="/" render={() => <div>/</div>} />,
+    <Route exact key="news" path="/news" sync render={() => <div>/news</div>} />,
+    <Route exact key="tech" path="/tech" render={() => <div>/tech</div>} />,
+    <Route exact key="browser" path="/browser" render={() => <div>/browser</div>} />
+];
 
 function onRenderSuccess({ html, url, env }) {
   console.log('on render success')
@@ -20,7 +18,9 @@ function onRenderSuccess({ html, url, env }) {
 ssr.render({
   url: '/',
   routes,
-  createApp,
+  models: [
+    appModel
+  ],
   env: {
   },
   initialState: {

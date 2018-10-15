@@ -1,4 +1,4 @@
-# express-dva-ssr
+# dva-ssr
 
 ![Build Status](https://img.shields.io/travis/alexayan/express-dva-ssr.svg)
 ![Coverage](https://img.shields.io/coveralls/alexayan/express-dva-ssr.svg)
@@ -37,17 +37,17 @@ import ssr from 'express-dva-ssr';
 
 ssr.config({
 	timeout: 6 * 1000, // 等待异步操作的超时时间
-	
+
 	/**
 	 * 异步操作超时后，是否终止渲染，并抛出异常
-	 * 
+	 *
 	 * true：忽略超时，停止等待异步操作，直接返回渲染结果
 	 * false：终止渲染，并抛出异常，渲染失败
 	 */
 	ignoreTimeout: true,
-	
+
 	verbose: true, // console 输出日志
-	
+
 	staticMarkup: false, // 是否创建额外的DOM属性
 });
 
@@ -62,25 +62,27 @@ import ssr from 'express-dva-ssr';
 
 const result:RenderResult = ssr.render({
 	url: 'https://www.example.com/users/alexyan', // 需要渲染的路由
-	
+
 	/**
 	 * 服务器端环境数据。
 	 * 在服务器端会在 namespace 为 ssr 的 model 中注入
 	 * 可以传入 http 请求中的 useragent 等请求相关信息，方便对渲染进行控制
-	 * 
+	 *
 	 * 注意!!!: 出于安全考虑，请不要传入服务器敏感信息
 	 */
 	env: { platform: 'mobile' },
-	
+
 	/**
 	 * 配置初始化 state
 	 */
 	initialState: {
-		
+
 	},
-	
+
 	/**
 	 * 初始化 dva app, 注册 model, 返回 dva 实例
+   *
+   * 如果指定 createApp, models 将不生效
 	 */
 	createApp: function(opts) {
 		const app = dva(opts);
@@ -88,18 +90,24 @@ const result:RenderResult = ssr.render({
   		app.model(require('./models/user'));
   		return app;
 	},
-	
+
 	/**
 	 * 配置 Routes, 参数详见 react-router
 	 */
-	routes: (<div>
-		<Route path="/" render={() => <div>/</div>} />
+	routes: [<Route path="/" render={() => <div>/</div>} />,
 		<Route path="/user" render={() => <div>/tech</div>} />
-	</div>),
-	
+  ],
+
+  /**
+	 * 配置 models, 详见 dva model
+	 */
+	models: [
+    Model
+  ],
+
 	/**
 	 * 生成完整网页
-	 * 
+	 *
 	 * html: 服务器端渲染片段
 	 * state: 渲染后的 state
 	 * context: 服务器端渲染上下文
@@ -115,17 +123,17 @@ const result:RenderResult = ssr.render({
 		`;
 		return indexHtml.replace(`<div id="root"></div>`, ssrHtml);
 	}
-	
+
 	/**
 	 * 完成最终渲染页面后调用，可以在这个阶段进行结果缓存等操作
-	 * 
+	 *
 	 * html: 服务器端渲结果
 	 * url: 渲染路由
 	 * state: 渲染后的 state
 	 * env: 服务器端环境数据
 	 */
 	onRenderSuccess: async (html, url, env, state) => {
-		
+
 	}
 });
 
@@ -139,19 +147,19 @@ const result:RenderResult = ssr.render({
 {
 	/**
 	 * 渲染结果状态码
-	 * 
+	 *
 	 * 200: 渲染成功
 	 * 404: 渲染失败，url 无法找到匹配的 route
 	 * 500: 渲染失败
 	 */
-	code: 200, 
-	
+	code: 200,
+
 	url: 'https://www.example.com/users/alexyan', // 渲染的路由
-	
+
 	env: {}, // 服务器端环境数据
-	
+
 	html: '<html></html>', // 服务器端渲染最终页面
-	
+
 	error: new Error('error') // 渲染异常，当 code 为 500 时存在
 }
 ```

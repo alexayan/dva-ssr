@@ -9,6 +9,7 @@ import { findRouteByUrl } from './utils';
 import dvaServerSync from './dvaServerSync';
 import block from './block';
 import {getConfig} from './config';
+import dva from 'dva';
 
 function existSSRModel(app) {
   try {
@@ -61,9 +62,7 @@ async function renderFragment(createApp, routes, url, initialState, timeout, sta
     app.model(ssrModel);
   }
   app.router(options => (<StaticRouter location={url} context={options.context}>
-    <div>
-      {routes}
-    </div>
+    <div>{routes}</div>
   </StaticRouter>));
   const asyncActions = getAsyncActions(app);
   const branch = findRouteByUrl(routes, url);
@@ -125,7 +124,7 @@ async function renderFragment(createApp, routes, url, initialState, timeout, sta
 }
 
 export default async function render({
-  url, env, routes, renderFullPage, createApp, initialState, onRenderSuccess
+  url, env, routes, renderFullPage, createApp, initialState, onRenderSuccess, models = []
 }) {
   const config = getConfig();
   try {
@@ -135,7 +134,16 @@ export default async function render({
         env,
       }
     });
-    const fragment = await renderFragment(createApp, routes, url, state, config.timeout, config.staticMarkup, config.ignoreTimeout);
+    if (!createApp) {
+      createApp = function (opts) {
+        const app = dva(opts);
+        models.forEach((model) => {
+          app.model(model);
+        })
+        return app;
+      }
+    }
+    const fragment = await renderFragment(createApp, routes, url, state, config.timeout, config.staticMarkup, config.ignoreTimeout, models);
     const context = fragment.context;
     if (!context) {
       if (config.verbose || config.__DEV__) {
