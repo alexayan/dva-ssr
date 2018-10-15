@@ -20,11 +20,6 @@
     "url": "git+https://github.com/alexayan/express-dva-ssr.git"
   },
   "license": "MIT",
-  "peerDependencies": {
-    "react-router": ">= 4.0.0",
-    "dva": ">= 2.0.0",
-    "react": ">= 16.0.0"
-  },
   "dependencies": {
     "babel-runtime": "^6.26.0",
     "history": "^4.7.2",
