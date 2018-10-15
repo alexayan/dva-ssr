@@ -183,6 +183,41 @@ app.use(exporesMiddleware);
 
 `<Route path="/" sync component={Index} />`
 
+## 写一个简单的服务器端渲染中间件
+
+```
+function runtimeSSRMiddle({
+  routes, renderFullPage, createApp, initialState, onRenderSuccess
+}) {
+  return async (req, res, next) => {
+    const result = await render({
+      url: req.url,
+      env: { ua: req.headers['user-agent'] },
+      routes,
+      renderFullPage,
+      createApp,
+      initialState,
+      onRenderSuccess
+    });
+    switch (result.code) {
+      case 200:
+        return res.end(result.html);
+      case 302:
+        return res.redirect(302, result.redirect);
+      case 404:
+        next();
+        break;
+      case 500:
+        next(result.error);
+        break;
+      default:
+        next();
+        break;
+    }
+  };
+}
+```
+
 ## DEMO
 
 [dva-example-user-dashboard-ssr](https://github.com/alexayan/dva-example-user-dashboard-ssr)

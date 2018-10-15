@@ -2,7 +2,7 @@ import MobileDetect from 'mobile-detect';
 import render from './render';
 
 export default function runtimeSSRMiddle({
-  routes, renderFullPage, createApp, initialState, onRenderSuccess, timeout=6000, verbose=true
+  routes, renderFullPage, createApp, initialState, onRenderSuccess
 }) {
   return async (req, res, next) => {
     const isMobile = !!new MobileDetect(req.headers['user-agent']).mobile();
@@ -13,9 +13,7 @@ export default function runtimeSSRMiddle({
       renderFullPage,
       createApp,
       initialState,
-      onRenderSuccess,
-      timeout,
-      verbose
+      onRenderSuccess
     });
     switch (result.code) {
       case 200:
