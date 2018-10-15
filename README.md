@@ -166,7 +166,7 @@ ssr.render({
 }
 ```
 
-### runtimeSSRMiddle({routes, renderFullPage, createApp, initialState, onRenderSuccess})
+### runtimeSSRMiddle({routes, models, renderFullPage, createApp, initialState, onRenderSuccess})
 
 返回 `Express` 中间件
 
@@ -175,6 +175,7 @@ ssr.render({
 ``` javascript
 const exporesMiddleware = ssr.runtimeSSRMiddle({
   routes,
+  models,
   createApp,
   renderFullPage,
   onRenderSuccess,
