@@ -1,4 +1,10 @@
 {
-  "presets": ["es2017", "react"],
-  "plugins": ["babel-plugin-add-module-exports", "babel-plugin-transform-es2015-modules-commonjs"]
+  "presets": [
+    ["env", {
+      "target": {
+        "node": "current"
+      }
+    }], "react"
+  ],
+  "plugins": ["transform-runtime"]
 }

@@ -1,9 +1,9 @@
 import runtimeSSRMiddle from './runtimeSSRMiddle';
-import preSSRService from './preSSRService';
 import render from './render';
+import {config} from './config';
 
 export default {
   runtimeSSRMiddle,
-  preSSRService,
   render,
+  config
 };

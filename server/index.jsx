@@ -6,7 +6,7 @@ import createApp from './createApp';
 
 const routes = (
   <div>
-    <Route exact sync path="/" render={() => <div>/</div>} />
+    <Route exact path="/" render={() => <div>/</div>} />
     <Route exact path="/news" sync render={() => <div>/news</div>} />
     <Route exact path="/tech" render={() => <div>/tech</div>} />
     <Route exact path="/browser" render={() => <div>/browser</div>} />
@@ -14,13 +14,15 @@ const routes = (
 );
 
 function onRenderSuccess({ html, url, env }) {
-  console.log(html, url, env);
+  console.log('on render success')
 }
 
-ssr.preSSRService({
-  interval: 10000,
+ssr.render({
+  url: '/',
   routes,
   createApp,
+  env: {
+  },
   initialState: {
     app: {
       sizeMode: 'lg',
@@ -31,4 +33,6 @@ ssr.preSSRService({
   },
   renderFullPage: html => html,
   onRenderSuccess,
-});
+}).then((result) => {
+  console.log(result)
+})

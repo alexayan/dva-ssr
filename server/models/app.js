@@ -21,6 +21,9 @@ export default {
   },
 
   effects: {
+    * fetchNewTopicCount({}, { select, put, call }) {
+      console.log(123)
+    }
   },
 
   reducers: {

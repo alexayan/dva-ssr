@@ -3,11 +3,12 @@ import uid from 'uid';
 import { StaticRouter } from 'react-router';
 import { createMemoryHistory } from 'history';
 import merge from 'lodash.merge';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { renderToStaticMarkup, renderToString } from 'react-dom/server';
 import ssrModel from './ssrModel';
 import { findRouteByUrl } from './utils';
 import dvaServerSync from './dvaServerSync';
 import block from './block';
+import {getConfig} from './config';
 
 function existSSRModel(app) {
   try {
@@ -45,7 +46,10 @@ function findSync(branch) {
   return sync;
 }
 
-async function renderFragment(createApp, routes, url, initialState, timeout, verbose) {
+async function renderFragment(createApp, routes, url, initialState, timeout, staticMarkup, ignoreTimeout) {
+  let asyncTime = 0;
+  let isTimeout = false;
+  const render = staticMarkup ? renderToStaticMarkup : renderToString;
   const history = createMemoryHistory();
   history.push(url);
   const context = {};
@@ -78,59 +82,86 @@ async function renderFragment(createApp, routes, url, initialState, timeout, ver
     const appDOM = app.start()({
       context,
     });
-    if (verbose) {
-      console.time(`${url}: async wait time`);
-    }
-    const result = await new Promise((resolve, reject) => {
-      const timer = setTimeout(() => {
-        reject(new Error('render timeout'));
-      }, timeout)
-      block.wait(id, () => {
-        if (verbose) {
-          console.timeEnd(`${url}: async wait time`);
+    const isLocked = block.isLocked(id);
+    if (isLocked) {
+      const asyncStartTime = Date.now();
+      try {
+        const result = await new Promise((resolve, reject) => {
+          const timer = setTimeout(() => {
+            reject(new Error('render timeout'));
+          }, timeout)
+          block.wait(id, () => {
+            asyncTime = Date.now() - asyncStartTime;
+            clearTimeout(timer);
+            const curState = appDOM.props.store.getState();
+            const html = render(appDOM);
+            resolve({ html, state: curState, context, performance: {
+              asyncTime
+            }});
+          });
+        });
+        return result;
+      } catch (e) {
+        isTimeout = true;
+        if (!ignoreTimeout) {
+          throw e;
         }
-        clearTimeout(timer);
-        const curState = appDOM.props.store.getState();
-        const html = renderToStaticMarkup(appDOM);
-        resolve({ html, state: curState, context });
-      });
-    });
-    return result;
+      }
+    }
+    const html = render(appDOM);
+    const curState = appDOM.props.store.getState();
+    return { html, state: curState, context, performance: {
+      asyncTime
+    }, isTimeout};
   }
   const appDOM = app.start()({
     context,
   });
-  const html = renderToStaticMarkup(appDOM);
+  const html = render(appDOM);
   const curState = appDOM.props.store.getState();
-  return { html, state: curState, context };
+  return { html, state: curState, context, performance: {
+    asyncTime
+  }};
 }
 
 export default async function render({
-  url, env, routes, renderFullPage, createApp, initialState, onRenderSuccess, timeout = 6000, verbose = true
+  url, env, routes, renderFullPage, createApp, initialState, onRenderSuccess
 }) {
+  const config = getConfig();
   try {
-    if (verbose) {
-      console.log(`[${url}]`)
-      console.time(`${url}: render time`);
-    }
+    const startTime = Date.now();
     const state = merge({}, initialState || {}, {
       ssr: {
         env,
       }
     });
-    const fragment = await renderFragment(createApp, routes, url, state, timeout, verbose);
-    if (verbose) {
-      console.timeEnd(`${url}: render time`);
-    }
+    const fragment = await renderFragment(createApp, routes, url, state, config.timeout, config.staticMarkup, config.ignoreTimeout);
     const context = fragment.context;
     if (!context) {
+      if (config.verbose || config.__DEV__) {
+        console.log(`fail to match url '${url}', please check routes`, env);
+      }
       return { code: 404, url, env };
     } else if (context.url) {
-      return {
-        code: 302, url, env, redirect: context.url,
-      };
+      if (config.verbose || config.__DEV__) {
+        console.log(`redirect to url '${context.url}'`, env);
+      }
+      return await render({
+        url: context.url, env, routes, renderFullPage, createApp, initialState, onRenderSuccess
+      })
     }
-    const html = await renderFullPage(fragment);
+    let html = fragment.html;
+    if (renderFullPage) {
+      html = await renderFullPage(fragment);
+    }
+    if (fragment.isTimeout) {
+      console.log(`render url '${url}' timeout`, env);
+    } else if (config.verbose || config.__DEV__) {
+      console.log(`render url '${url}' success in ${Date.now() - startTime} ms`, env);
+      if (fragment.performance.asyncTime) {
+        console.log(`async time: ${fragment.performance.asyncTime} ms\n`);
+      }
+    }
     if (onRenderSuccess) {
       await onRenderSuccess({
         html, url, env, state: fragment.state,
@@ -140,6 +171,7 @@ export default async function render({
       code: 200, url, env, html,
     };
   } catch (e) {
+    console.log(`render url '${url}' error`, env);
     console.error(e);
     return {
       code: 500, url, env, error: e,

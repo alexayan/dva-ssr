@@ -1,4 +1,0 @@
-{
-    "presets": ["es2017"],
-    "plugins": ["babel-plugin-add-module-exports", "babel-plugin-transform-es2015-modules-commonjs"]   
-}
